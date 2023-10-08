@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+
+container=$1
+database=$2
+
+exec docker exec --interactive "$container" mariadb --database="$database"

@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+
+name1=$1
+name2=$2
+
+test "${name1%%-*}" -gt "${name2%%-*}"

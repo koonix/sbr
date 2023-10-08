@@ -1,0 +1,12 @@
+#!/bin/bash
+set -eu -o pipefail
+sbr() { "$SBR" "$@" ;}
+
+name=$1
+source=$2
+local=$3
+
+mkdir -p "$local"
+sbr tar-from "$source" | sbr zstd | sbr write "$name.tar.zst" "$local"
+
+echo backup success

@@ -1,0 +1,2 @@
+#!/bin/sh -eu
+exec sort --reverse --numeric-sort --field-separator=- --key=1,1 --key=2 "$@"

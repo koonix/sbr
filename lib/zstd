@@ -1,0 +1,2 @@
+#!/bin/sh -eu
+exec zstd -10 --threads=0 "$@"

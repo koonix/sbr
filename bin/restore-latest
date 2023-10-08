@@ -1,0 +1,44 @@
+#!/bin/bash
+set -eu -o pipefail
+sbr() { "$SBR" "$@" ;}
+
+source=$1
+local=$2
+remote=$3
+
+if ! sbr exists "$source"; then
+	echo 'the source does not exist.' >&2
+	exit 1
+elif [[ -n $(sbr list "$source") ]]; then
+	echo 'cannot restore to a non-empty source.' >&2
+	exit 1
+fi
+
+mkdir -p -- "$local"
+latest_local=$(  sbr list "$local"  | sbr nth 1 )
+latest_remote=$( sbr list "$remote" | sbr nth 1 )
+
+if
+	(
+	  [[ -z $latest_local ]] && [[ -n $latest_remote ]]
+	) ||
+	(
+	  [[ -n $latest_local ]] &&
+	  [[ -n $latest_remote ]] &&
+	  sbr isnewer "$latest_remote" "$latest_local"
+	)
+then
+	sbr copy "$remote/$latest_remote" "$local"
+fi
+
+latest=$(sbr list "$local" | sbr new 1)
+
+if [[ -z $latest ]]; then
+	echo 'no backups to restore from.'
+	exit 0
+fi
+
+sbr unzstd "$local/$latest" |
+	sbr untar-to "$source"
+
+echo restore success

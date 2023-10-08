@@ -1,0 +1,16 @@
+#!/bin/bash
+set -eu -o pipefail
+sbr() { "$SBR" "$@" ;}
+
+local=$1
+remote=$2
+
+if
+	diff --side-by-side --width 80 --color \
+		<(sbr list "$local") <(sbr list "$remote")
+then
+	echo check success
+else
+	echo check fail
+	exit 1
+fi

@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+
+container=$1
+database=$2
+
+exec docker exec "$container" mariadb-dump "$database"

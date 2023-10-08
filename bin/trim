@@ -1,0 +1,12 @@
+#!/bin/bash
+set -eu -o pipefail
+sbr() { "$SBR" "$@" ;}
+
+path=$1
+keep=$2
+
+sbr list "$path" | sbr old "$keep" | sbr xargs -I{} sbr rmfile "$path/{}"
+readarray -t files < <(sbr list "$path")
+[[ ${#files[@]} -eq $keep ]]
+
+echo trim success

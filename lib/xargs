@@ -1,0 +1,2 @@
+#!/bin/sh -eu
+exec xargs --no-run-if-empty --delimiter='\n' "$@"

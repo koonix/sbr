@@ -1,0 +1,128 @@
+#!/bin/bash
+set -eu -o pipefail
+
+main()
+{
+	cmd=${1:-}
+
+	case $cmd in
+		isnewer|isnumber|new|nth|old|sort|unzstd|write|xargs|zstd)
+			lib "$@"
+		;;
+		backup|check|export|restore-latest|trim)
+			bin "$@"
+		;;
+		chmod|chown|clear|exists|list|ls|\
+		mkdir|rm|rmdir|rmfile|tar-from|untar-to)
+			fs "$@"
+		;;
+		copy)
+			remote "$@"
+		;;
+		*)
+			print_help
+			exit 1
+		;;
+	esac
+}
+
+lib()
+{
+	local cmd=$1
+	shift
+	call "lib/$cmd" "$@"
+}
+
+bin()
+{
+	local cmd=$1
+	shift
+	call "bin/$cmd" "$@"
+}
+
+fs()
+{
+	local cmd=$1 path=$2
+	case $path in
+		docker-volume:*|dv:*)
+			path=${path#*:}
+			volume=${path%%:*}
+			path=${path#$volume}
+			path=${path#:}
+			if ! docker volume inspect -- "$volume" >/dev/null 2>&1; then
+				echo "'$volume': no such docker volume" >&2
+				exit 1
+			fi
+			call "fs/docker-volume/$cmd" "$volume" ${path:+"$path"}
+		;;
+		rclone:*)
+			path=${path#*:}
+			call "fs/rclone/$cmd" "$path"
+		;;
+		mariadb-docker:*|mdbd:*)
+			path=${path#*:}
+			container=${path%%:*}
+			database=${path#$container}
+			database=${database#:}
+			call "fs/mariadb-docker/$cmd" "$container" ${database:+"$database"}
+		;;
+		local:*)
+			path=${path#*:}
+			call "fs/local/$cmd" "$path"
+		;;
+		*)
+			call "fs/local/$cmd" "$path"
+		;;
+	esac
+}
+
+remote()
+{
+	local cmd=$1 path1=$2 path2=$3
+	if [[ $path1 == rclone:* ]] || [[ $path2 == rclone:* ]]; then
+		path1=${path1#rclone:}
+		path2=${path2#rclone:}
+		call "fs/rclone/$cmd" "$path1" "$path2"
+	else
+		echo 'this command does not support the given path type combination' >&2
+		exit 1
+	fi
+}
+
+call()
+{
+	local cmd=$1
+	shift
+	SBR="$0" "$SBR_LIB_DIR/$cmd" "$@"
+}
+
+print_help()
+{
+cat << EOF
+
+usage: sbr COMMAND [ARG...]
+
+bin commands:
+
+  backup  check  export
+  restore-latest  trim
+
+lib commands:
+
+  isnewer  isnumber  new  nth  old
+  sort  unzstd  write  xargs  zstd
+
+fs commands:
+
+  chmod  chown  clear  exists  list
+  ls  mkdir  rm  rmdir  rmfile
+  tar-from  untar-to
+
+remote commands:
+
+  copy
+
+EOF
+}
+
+main "$@"

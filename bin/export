@@ -1,0 +1,10 @@
+#!/bin/bash
+set -eu -o pipefail
+sbr() { "$SBR" "$@" ;}
+
+local=$1
+remote=$2
+
+sbr copy "$local" "$remote"
+
+echo export success

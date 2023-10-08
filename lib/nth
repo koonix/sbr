@@ -1,0 +1,8 @@
+#!/bin/bash
+set -eu -o pipefail
+sbr() { "$SBR" "$@" ;}
+
+num=$1
+
+sbr isnumber "$num"
+sbr sort | sed "${num}q;d"

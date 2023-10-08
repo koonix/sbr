@@ -1,0 +1,8 @@
+#!/bin/sh -eu
+
+src=$1
+dest=$2
+shift 2
+
+exec rclone copy --verbose --check-first --order-by modtime,desc \
+	"$@" -- "$src" "$dest"
