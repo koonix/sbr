@@ -7,6 +7,6 @@ path=$2
 
 sbr list "$path" | sbr old "$keep" | sbr xargs -I{} sbr rmfile "$path/{}"
 readarray -t files < <(sbr list "$path")
-[[ ${#files[@]} -eq $keep ]]
+[[ ${#files[@]} -le $keep ]]
 
 echo trim success
