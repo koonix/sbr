@@ -4,7 +4,7 @@ PREFIX ?= /usr/local
 all:
 
 install:
-	printf '%s\n' '#!/bin/sh' 'SBR_LIB_DIR=${DESTDIR}${PREFIX}/lib/sbr exec ${DESTDIR}${PREFIX}/lib/sbr/sbr "$$@"' > "${DESTDIR}${PREFIX}/bin/sbr"
+	printf '%s\n' '#!/bin/sh' 'SBR_LIB_DIR="${DESTDIR}${PREFIX}/lib/sbr" exec "${DESTDIR}${PREFIX}/lib/sbr/sbr" "$$@"' > "${DESTDIR}${PREFIX}/bin/sbr"
 	chmod 755 -- "${DESTDIR}${PREFIX}/bin/sbr"
 	mkdir -p -- "${DESTDIR}${PREFIX}/lib/sbr"
 	cp -r -- sbr lib fs bin "${DESTDIR}${PREFIX}/lib/sbr"
