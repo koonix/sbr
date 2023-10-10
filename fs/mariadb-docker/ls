@@ -2,5 +2,8 @@
 
 container=$1
 database=$2
+optfile=${3:-}
 
-exec docker exec "$container" mariadb-show --count -- "$database"
+exec docker exec "$container" mariadb-show \
+	${optfile:+--defaults-extra-file="$optfile"} \
+	--count -- "$database"

@@ -45,10 +45,9 @@ fs()
 	local cmd=$1 path=$2
 	case $path in
 		docker-volume:*|dv:*)
-			path=${path#*:}
-			volume=${path%%:*}
-			path=${path#$volume}
-			path=${path#:}
+			IFS=$'\n' read -d '' -ra seg <<< "${path//:/$'\n'}"
+			volume=${seg[0]}
+			path=${seg[1]:-}
 			if ! docker volume inspect -- "$volume" >/dev/null 2>&1; then
 				echo "'$volume': no such docker volume" >&2
 				exit 1
@@ -60,11 +59,11 @@ fs()
 			call "fs/rclone/$cmd" "$path"
 		;;
 		mariadb-docker:*|mdbd:*)
-			path=${path#*:}
-			container=${path%%:*}
-			database=${path#$container}
-			database=${database#:}
-			call "fs/mariadb-docker/$cmd" "$container" ${database:+"$database"}
+			IFS=$'\n' read -d '' -ra seg <<< "${path//:/$'\n'}"
+			container=${seg[0]}
+			database=${seg[1]}
+			optfile=${seg[2]:-}
+			call "fs/mariadb-docker/$cmd" "$container" "$database" ${optfile:+"$optfile"}
 		;;
 		local:*)
 			path=${path#*:}
@@ -94,6 +93,13 @@ call()
 	local cmd=$1
 	shift
 	SBR="$0" "$SBR_LIB_DIR/$cmd" "$@"
+}
+
+split()
+{
+	local arr
+	IFS=$'\n' read -d '' -ra seg <<< "${1//:/$'\n'}"
+	printf '%s\n' "${arr[@]}"
 }
 
 print_help()

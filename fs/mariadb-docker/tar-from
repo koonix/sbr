@@ -2,5 +2,8 @@
 
 container=$1
 database=$2
+optfile=${3:-}
 
-exec docker exec "$container" mariadb-dump "$database"
+exec docker exec "$container" mariadb-dump \
+	${optfile:+--defaults-extra-file="$optfile"} \
+	"$database"
