@@ -6,5 +6,5 @@ path=${2:-}
 exec docker run --rm --volume "$volume:/volume:rw" alpine:3 sh -c '
 	set -eu
 	path=${0:-}
-	rm -rf -- "/volume${path:+/$path}"/*
+	rm -rf -- "/volume${path:+/$path}"/* "/volume${path:+/$path}"/.*
 ' "$path"

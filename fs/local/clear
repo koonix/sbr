@@ -2,4 +2,4 @@
 
 path=$1
 
-exec rm -rf -- "$path"/*
+exec rm -rf -- "$path"/* "$path"/.*
