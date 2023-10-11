@@ -45,6 +45,10 @@ fs()
 {
 	local cmd=$1 path=$2
 	IFS=$'\n' read -d '' -ra seg <<< "${path//:/$'\n'}" ||:
+	if [[ ${#seg[@]} -le 1 ]]; then
+		call "fs/local/$cmd" "$path"
+		return
+	fi
 	case ${seg[0]} in
 		docker-volume|dv)
 			volume=${seg[1]}
