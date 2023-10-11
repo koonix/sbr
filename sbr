@@ -45,7 +45,7 @@ fs()
 {
 	local cmd=$1 path=$2
 	IFS=$'\n' read -d '' -ra seg <<< "${path//:/$'\n'}" ||:
-	if [[ ${#seg[@]} -le 1 ]]; then
+	if [[ ${#seg[@]} -le 1 ]] && ! [[ $path == *:* ]]; then
 		call "fs/local/$cmd" "$path"
 		return
 	fi
