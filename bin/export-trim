@@ -1,0 +1,14 @@
+#!/bin/sh -eu
+
+keep=$1
+local=$2
+shift 2
+
+sbr trim 1 "$local"
+
+for remote; do
+	if [ -n "$remote" ]; then
+		sbr export "$local" "$remote"
+		sbr trim "$keep" "$remote"
+	fi
+done
