@@ -5,8 +5,10 @@ sbr() { "$SBR" "$@" ;}
 keep=$1
 path=$2
 
+echo "trimming '$path'..."
+
 sbr list "$path" | sbr old "$keep" | sbr xargs -I{} sbr rmfile "$path/{}"
 readarray -t files < <(sbr list "$path")
 [[ ${#files[@]} -le $keep ]]
 
-echo trim success
+echo 'trim success'

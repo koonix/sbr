@@ -6,6 +6,8 @@ source=$1
 local=$2
 remote=$3
 
+echo "restoring '$source'..."
+
 if ! sbr exists "$source"; then
 	echo 'the source does not exist.' >&2
 	exit 1
@@ -41,4 +43,4 @@ fi
 sbr unzstd "$local/$latest" |
 	sbr untar-to "$source"
 
-echo restore success
+echo 'restore success'
