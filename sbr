@@ -10,7 +10,8 @@ main()
 		isnewer|isnumber|new|nth|old|sort|unzstd|write|xargs|zstd)
 			lib "$@"
 		;;
-		backup|check|export|restore-latest|trim)
+		backup|check|export|restore-latest|trim|\
+		uncontain|export-trim|select-remote)
 			bin "$@"
 		;;
 		chmod|chown|clear|exists|list|ls|\
