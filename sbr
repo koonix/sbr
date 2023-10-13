@@ -61,7 +61,7 @@ fs()
 			call "fs/docker-volume/$cmd" "$volume" ${path:+"$path"}
 		;;
 		rclone)
-			path=${seg[1]}
+			path=${path#${seg[0]}}
 			call "fs/rclone/$cmd" "$path"
 		;;
 		mariadb-docker|mdbd)
