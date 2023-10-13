@@ -115,8 +115,8 @@ usage: sbr COMMAND [ARG...]
 
 bin commands:
 
-  backup  check  export
-  restore-latest  trim
+  backup  check  export  restore-latest
+  trim  export-trim  uncontain  select-remote
 
 lib commands:
 
