@@ -63,6 +63,12 @@ fs()
 			call "fs/rclone/$cmd" "$path"
 		;;
 
+		docker-container|dc)
+			container=${seg[1]}
+			path=${seg[2]}
+			call "fs/docker-container/$cmd" "$container" "$path"
+		;;
+
 		docker-volume|dv)
 			volume=${seg[1]}
 			path=${seg[2]:-}

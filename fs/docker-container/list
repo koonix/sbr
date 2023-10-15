@@ -1,0 +1,15 @@
+#!/bin/sh -eu
+
+container=$1
+path=$2
+
+exec docker exec "$container" sh -c '
+	set -eu
+	path=$0
+	cd "$path"
+	for file in * .*; do
+		if [ -e "$file" ] && [ "$file" != . ] && [ $file != .. ]; then
+			printf "%s\n" "$file"
+		fi
+	done
+' "$path"
