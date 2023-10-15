@@ -48,6 +48,7 @@ main()
 
 	esac; done
 
+	[[ -z $name   ]] && die 'no name specified'
 	[[ -z $source ]] && die 'no source specified'
 	[[ -z $cache  ]] && die 'no cache specified'
 
