@@ -37,7 +37,8 @@ docker exec --interactive "$container" mariadb \
 	${extra_file:+--defaults-extra-file="$extra_file"} \
 	${user:+--user="$user"} --database=$database \
 <<- EOF
-	drop table replace(load_file('$param_file'), '\n', '') cascade;
+	set @tbl = replace(load_file('$param_file'), '\n', '');
+	drop table @tbl cascade;
 EOF
 
 docker exec "$container" rm "$param_file"
