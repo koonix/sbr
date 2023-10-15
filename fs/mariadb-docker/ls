@@ -30,8 +30,8 @@ param_file=$(
 )
 
 docker exec "$container" mariadb-show \
-	${user:+--user="$user"} \
 	${extra_file:+--defaults-extra-file="$extra_file"} \
+	${user:+--user="$user"} \
 	--count -- "$database"
 
 docker exec "$container" rm "$param_file"

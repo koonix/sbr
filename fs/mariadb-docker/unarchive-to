@@ -21,8 +21,8 @@ if [[ -n $password_file ]]; then
 fi
 
 docker exec --interactive "$container" mariadb \
-	${user:+--user="$user"} \
 	${extra_file:+--defaults-extra-file="$extra_file"} \
+	${user:+--user="$user"} \
 	--database="$database"
 
 if [[ -n $extra_file ]]; then

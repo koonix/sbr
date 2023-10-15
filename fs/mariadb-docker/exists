@@ -30,9 +30,9 @@ param_file=$(
 )
 
 result=$(
-	docker exec --interactive "$container" mariadb --silent \
-		${user:+--user="$user"} \
+	docker exec --interactive "$container" mariadb \
 		${extra_file:+--defaults-extra-file="$extra_file"} \
+		${user:+--user="$user"} --silent \
 	<<- EOF
 		select schema_name
 		from information_schema.schemata
