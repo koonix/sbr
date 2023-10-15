@@ -9,6 +9,4 @@ join()
 	echo "$*"
 }
 
-path=$(join ':' "$@")
-
-sbr exists "$path"
+sbr exists "mariadb-docker:$(join ':' "$@")"
