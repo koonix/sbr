@@ -7,8 +7,8 @@ exec docker run --rm --volume "$volume:/volume:ro" alpine:3 sh -c '
 	set -eu
 	path=${0:-}
 	cd "/volume${path:+/$path}"
-	for file in *; do
-		if [ -e "$file" ]; then
+	for file in * .*; do
+		if [ -e "$file" ] && [ "$file" != . ] && [ $file != .. ]; then
 			printf "%s\n" "$file"
 		fi
 	done
