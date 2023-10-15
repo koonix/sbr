@@ -1,4 +1,5 @@
-#!/bin/sh -eu
+#!/bin/bash
+set -eu -o pipefail
 sbr() { "$SBR" "$@" ;}
 
 join()
@@ -8,6 +9,6 @@ join()
 	echo "$*"
 }
 
-path=$(join ':' "$*")
+path=$(join ':' "$@")
 
 sbr exists "$path"
