@@ -1,0 +1,13 @@
+#!/bin/sh -eu
+sbr() { "$SBR" "$@" ;}
+
+join()
+{
+	local IFS=$1
+	shift
+	echo "$*"
+}
+
+path=$(join ':' "$*")
+
+sbr exists "$path" && [ -z "$(sbr list "$path")" ]

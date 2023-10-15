@@ -7,18 +7,19 @@ main()
 	cmd=${1:-}
 
 	case $cmd in
-		isnewer|isnumber|new|nth|old|sort|unzstd|write|xargs|zstd)
+		dc-is-running|dc-start|dc-status|dc-stop|decrypt|\
+		encrypt|is-newer|is-number|newest|nth|oldest|sort|\
+		unzstd|write|xargs|zstd)
 			lib "$@"
 		;;
 
-		backup|check|export|restore-latest|trim|\
-		uncontain|export-trim|select-remote)
-			bin "$@"
+		archive-from|chmod|chown|clear|exists|is-restorable|\
+		list|ls|mkdir|rm|rmdir|rmfile|unarchive-to)
+			fs "$@"
 		;;
 
-		chmod|chown|clear|exists|list|ls|\
-		mkdir|rm|rmdir|rmfile|tar-from|untar-to)
-			fs "$@"
+		backup|restore-latest)
+			bin "$@"
 		;;
 
 		copy)
@@ -26,7 +27,7 @@ main()
 		;;
 
 		*)
-			print_help
+			echo "unrecognized command '$1'" >&2
 			exit 1
 		;;
 	esac
@@ -124,35 +125,6 @@ split()
 	local arr
 	IFS=$'\n' read -d '' -ra seg <<< "${1//:/$'\n'}"
 	printf '%s\n' "${arr[@]}"
-}
-
-print_help()
-{
-cat << EOF
-
-usage: sbr COMMAND [ARG...]
-
-bin commands:
-
-  backup  check  export  restore-latest
-  trim  export-trim  uncontain  select-remote
-
-lib commands:
-
-  isnewer  isnumber  new  nth  old
-  sort  unzstd  write  xargs  zstd
-
-fs commands:
-
-  chmod  chown  clear  exists  list
-  ls  mkdir  rm  rmdir  rmfile
-  tar-from  untar-to
-
-remote commands:
-
-  copy
-
-EOF
 }
 
 main "$@"

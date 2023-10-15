@@ -1,46 +1,118 @@
 #!/bin/bash
-set -eu -o pipefail
+set -euE -o pipefail
+trap 'echo "$0: failed at line $LINENO: $BASH_COMMAND"' ERR
 sbr() { "$SBR" "$@" ;}
 
-source=$1
-local=$2
-remote=$3
+main()
+{
+	source=''
+	cache=''
+	remotes=()
+	password_file=''
+	container=''
 
-echo "restoring '$source'..."
+	while :; do case $1 in
 
-if ! sbr exists "$source"; then
-	echo 'the source does not exist.' >&2
+		--source          ) source=$2;              shift 2 ;;
+		--source=*        ) source=${1#*=};         shift   ;;
+
+		--cache           ) cache=$2;               shift 2 ;;
+		--cache=*         ) cache=${1#*=};          shift   ;;
+
+		--remote          ) remotes+=("$2");        shift 2 ;;
+		--remote=*        ) remotes+=("${1#*=}");   shift   ;;
+
+		--password-file   ) password_file=$2;       shift 2 ;;
+		--password-file=* ) password_file=${1#*=};  shift   ;;
+
+		--container       ) container=$2;           shift 2 ;;
+		--container=*     ) container=${1#*=};      shift   ;;
+
+		*)
+			die "unrecognized option '$1'"
+		;;
+
+	esac; done
+
+	[[ -z $source ]] && die 'no source specified'
+	[[ -z $cache  ]] && die 'no cache specified'
+	[[ ${#remotes[@]} -le 0 ]] && die 'no remotes specified'
+
+	remote=''
+
+	if [[ ${#remotes[@]} -eq 1 ]]; then
+		remote=${remotes[0]}
+	else
+		printf '%s\n' "${remotes[@]}" | nl --number-width=2
+		read -p "select a remote to restore from: " num
+		[[ $num -eq $num ]]
+		if [[ $num -lt 1 ]] && [[ $num -gt ${#remotes[@]} ]]; then
+			die 'number out of range'
+		fi
+		remote=${remotes[$num - 1]}
+	fi
+
+	if ! sbr restorable "$source"; then
+		die "the specified source ($source) cannot be restored to." \
+			"this is because either the source doesn't exists or it's not empty."
+	fi
+
+	mkdir --parents --mode=700 -- "$cache"
+
+	latest_cache=$(  sbr list "$cache"  | sbr nth 1 )
+	latest_remote=$( sbr list "$remote" | sbr nth 1 )
+
+	if
+		(
+		  [[ -z $latest_cache ]] && [[ -n $latest_remote ]]
+		) ||
+		(
+		  [[ -n $latest_cache ]] &&
+		  [[ -n $latest_remote ]] &&
+		  sbr is-newer "$latest_remote" "$latest_cache"
+		)
+	then
+		echo "pulling the latest backup from '$remote'..."
+		sbr copy "$remote/$latest_remote" "$cache"
+	fi
+
+	latest=$(sbr list "$cache" | sbr newest 1)
+
+	if [[ -z $latest ]]; then
+		die 'no backups found to restore from.'
+	fi
+
+	run_container=false
+
+	if [[ -n $container ]] && sbr dc-is-running "$container"; then
+		echo "stopping container '$container'..."
+		sbr dc-stop "$container"
+		run_container=true
+	fi
+
+	echo "unarchiving to '$source'..."
+
+	cat "$cache/$latest" |
+		(
+			if [[ -n $password_file ]]; then
+				sbr decrypt "$password_file"
+			else
+				cat
+			fi
+		) |
+		sbr unzstd |
+		sbr unarchive-to "$source"
+
+	if [[ $run_container == true ]]; then
+		echo "starting container '$container'..."
+		sbr dc-start "$container"
+	fi
+}
+
+die()
+{
+	printf '%s\n' "$@" >&2
 	exit 1
-elif [[ -n $(sbr list "$source") ]]; then
-	echo 'cannot restore to a non-empty source.' >&2
-	exit 1
-fi
+}
 
-mkdir -p -- "$local"
-latest_local=$(  sbr list "$local"  | sbr nth 1 )
-latest_remote=$( sbr list "$remote" | sbr nth 1 )
-
-if
-	(
-	  [[ -z $latest_local ]] && [[ -n $latest_remote ]]
-	) ||
-	(
-	  [[ -n $latest_local ]] &&
-	  [[ -n $latest_remote ]] &&
-	  sbr isnewer "$latest_remote" "$latest_local"
-	)
-then
-	sbr copy "$remote/$latest_remote" "$local"
-fi
-
-latest=$(sbr list "$local" | sbr new 1)
-
-if [[ -z $latest ]]; then
-	echo 'no backups to restore from.'
-	exit 0
-fi
-
-sbr unzstd "$local/$latest" |
-	sbr untar-to "$source"
-
-echo 'restore success'
+main "$@"

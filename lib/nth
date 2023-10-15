@@ -4,5 +4,5 @@ sbr() { "$SBR" "$@" ;}
 
 num=$1
 
-sbr isnumber "$num"
+sbr is-number "$num"
 sbr sort | sed "${num}q;d"

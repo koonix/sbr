@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+sbr() { "$SBR" "$@" ;}
+
+container=$1
+
+test running = "$(sbr dc-status "$container" 2>/dev/null ||:)"

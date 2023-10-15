@@ -4,5 +4,5 @@ sbr() { "$SBR" "$@" ;}
 
 num=$1
 
-sbr isnumber "$num"
-sbr sort | head --lines="$num"
+sbr is-number "$num"
+sbr sort | tail --lines=+$(( num + 1 ))

@@ -1,0 +1,5 @@
+#!/bin/sh -eu
+
+container=$1
+
+exec docker container start "$container" >/dev/null

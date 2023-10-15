@@ -1,0 +1,45 @@
+#!/bin/bash
+set -eu -o pipefail
+
+container=$1
+path=$2
+user=${3:-}
+password_file=${4:-}
+
+database=${path%%/*}
+table=${path#${database}/}
+
+extra_file=''
+
+if [[ -n $password_file ]]; then
+	extra_file=$(
+		docker exec --interactive "$container" sh -c '
+			set -eu
+			file=$(mktemp)
+			printf "[client]\npassword=" > "$file"
+			cat > "$file"
+		' < "$password_file"
+	)
+fi
+
+param_file=$(
+	docker exec --interactive "$container" sh -c '
+		set -eu
+		file=$(mktemp)
+		cat > "$file"
+		echo "$file"
+	' <<< "$table"
+)
+
+docker exec --interactive "$container" mariadb \
+	--database=$database ${user:+--user="$user"} \
+	${extra_file:+--defaults-extra-file="$extra_file"} \
+<<- EOF
+	drop table replace(load_file('$param_file')) cascade;
+EOF
+
+docker exec "$container" rm "$param_file"
+
+if [[ -n $extra_file ]]; then
+	docker exec "$container" rm "$extra_file"
+fi

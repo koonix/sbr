@@ -1,2 +1,3 @@
 #!/bin/sh -eu
+
 exec zstd --decompress --stdout --threads=0 "$@"
