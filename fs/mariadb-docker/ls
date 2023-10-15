@@ -1,9 +1,40 @@
-#!/bin/sh -eu
+#!/bin/bash
+set -eu -o pipefail
 
 container=$1
 database=$2
-optfile=${3:-}
+user=${3:-}
+password_file=${4:-}
 
-exec docker exec "$container" mariadb-show \
-	${optfile:+--defaults-extra-file="$optfile"} \
+extra_file=''
+
+if [[ -n $password_file ]]; then
+	extra_file=$(
+		docker exec --interactive "$container" sh -c '
+			set -eu
+			file=$(mktemp)
+			printf "[client]\npassword=" > "$file"
+			cat >> "$file"
+		' < "$password_file"
+	)
+fi
+
+param_file=$(
+	docker exec --interactive "$container" sh -c '
+		set -eu
+		file=$(mktemp)
+		cat > "$file"
+		echo "$file"
+	' <<< "$database"
+)
+
+docker exec "$container" mariadb-show \
+	${user:+--user="$user"} \
+	${extra_file:+--defaults-extra-file="$extra_file"} \
 	--count -- "$database"
+
+docker exec "$container" rm "$param_file"
+
+if [[ -n $extra_file ]]; then
+	docker exec "$container" rm "$extra_file"
+fi
