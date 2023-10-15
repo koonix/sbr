@@ -47,6 +47,9 @@ main()
 		;;
 	esac; done
 
+	[[ -z $source ]] && die 'no source specified'
+	[[ -z $cache  ]] && die 'no cache specified'
+
 	run_container=false
 
 	if [[ -n $container ]] && sbr dc-is-running "$container"; then
