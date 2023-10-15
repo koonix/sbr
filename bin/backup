@@ -15,7 +15,7 @@ main()
 	container=''
 	force=false
 
-	while :; do case $1 in
+	while :; do case ${1:-} in
 		--name            ) name=$2;                shift 2 ;;
 		--name=*          ) name=${1#*=};           shift   ;;
 
