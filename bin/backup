@@ -106,8 +106,6 @@ trim()
 {
 	local path=$1 keep=$2
 
-	echo "trimming '$path'..."
-
 	sbr list "$path" |
 		sbr oldest "$keep" |
 		sbr xargs -I{} sbr rmfile "$path/{}"
