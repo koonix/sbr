@@ -18,6 +18,7 @@ if [[ -n $password_file ]]; then
 			file=$(mktemp)
 			printf "[client]\npassword=" > "$file"
 			cat >> "$file"
+			echo "$file"
 		' < "$password_file"
 	)
 fi
