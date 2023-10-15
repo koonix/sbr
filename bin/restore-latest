@@ -51,7 +51,7 @@ main()
 		remote=${remotes[$num - 1]}
 	fi
 
-	if ! sbr restorable "$source"; then
+	if ! sbr is-restorable "$source"; then
 		die "the specified source ($source) cannot be restored to." \
 			"this is because either the source doesn't exists or it's not empty."
 	fi
