@@ -27,6 +27,7 @@ param_file=$(
 	docker exec --interactive "$container" sh -c '
 		set -eu
 		file=$(mktemp)
+		chmod 644 "$file"
 		cat > "$file"
 		echo "$file"
 	' <<< "$table"
