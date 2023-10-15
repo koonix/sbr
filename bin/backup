@@ -43,7 +43,7 @@ main()
 		--force           ) force=true              shift   ;;
 
 		*)
-			die "unrecognized option '$1'"
+			die "unrecognized option '${1:-}'"
 		;;
 	esac; done
 
