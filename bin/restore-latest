@@ -106,6 +106,8 @@ main()
 		echo "starting container '$container'..."
 		sbr dc-start "$container"
 	fi
+
+	echo 'done.'
 }
 
 die()

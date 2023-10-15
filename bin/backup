@@ -97,6 +97,8 @@ main()
 			trim "$r" "$remote_keep"
 		done
 	fi
+
+	echo 'done.'
 }
 
 trim()
