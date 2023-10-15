@@ -10,4 +10,4 @@ join()
 
 path=$(join ':' "$*")
 
-sbr exists "$path" && [ -z "$(sbr list "$path")" ]
+sbr exists "$path"
