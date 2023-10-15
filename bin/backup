@@ -82,7 +82,7 @@ main()
 	fi
 
 	for r in "${remotes[@]}"; do
-		echo "exporting to '$remote'..."
+		echo "exporting to '$r'..."
 		sbr copy "$cache" "$r"
 	done
 
