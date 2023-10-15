@@ -6,5 +6,10 @@ path=${2:-}
 exec docker run --rm --volume "$volume:/volume:rw" alpine:3 sh -c '
 	set -eu
 	path=${0:-}
-	rm -rf -- "/volume${path:+/$path}"/* "/volume${path:+/$path}"/.*
+	cd "/volume${path:+/$path}"
+	for file in * .*; do
+		if [ -e "$file" ] && [ "$file" != . ] && [ $file != .. ]; then
+			rm -rf -- "$file"
+		fi
+	done
 ' "$path"
