@@ -12,36 +12,36 @@ main()
 	cache_keep=''
 	remote_keep=''
 	password_file=''
-	container=''
+	containers=()
 	force=false
 
 	while :; do case ${1:-} in
 
-		--name            ) name=$2;                shift 2 ;;
-		--name=*          ) name=${1#*=};           shift   ;;
+		--name            ) name=$2;                   shift 2 ;;
+		--name=*          ) name=${1#*=};              shift   ;;
 
-		--source          ) source=$2;              shift 2 ;;
-		--source=*        ) source=${1#*=};         shift   ;;
+		--source          ) source=$2;                 shift 2 ;;
+		--source=*        ) source=${1#*=};            shift   ;;
 
-		--cache           ) cache=$2;               shift 2 ;;
-		--cache=*         ) cache=${1#*=};          shift   ;;
+		--cache           ) cache=$2;                  shift 2 ;;
+		--cache=*         ) cache=${1#*=};             shift   ;;
 
-		--remote          ) remotes+=("$2");        shift 2 ;;
-		--remote=*        ) remotes+=("${1#*=}");   shift   ;;
+		--remote          ) remotes+=("$2");           shift 2 ;;
+		--remote=*        ) remotes+=("${1#*=}");      shift   ;;
 
-		--cache-keep      ) cache_keep=$2;          shift 2 ;;
-		--cache-keep=*    ) cache_keep=${1#*=};     shift   ;;
+		--cache-keep      ) cache_keep=$2;             shift 2 ;;
+		--cache-keep=*    ) cache_keep=${1#*=};        shift   ;;
 
-		--remote-keep     ) remote_keep=$2;         shift 2 ;;
-		--remote-keep=*   ) remote_keep=${1#*=};    shift   ;;
+		--remote-keep     ) remote_keep=$2;            shift 2 ;;
+		--remote-keep=*   ) remote_keep=${1#*=};       shift   ;;
 
-		--password-file   ) password_file=$2;       shift 2 ;;
-		--password-file=* ) password_file=${1#*=};  shift   ;;
+		--password-file   ) password_file=$2;          shift 2 ;;
+		--password-file=* ) password_file=${1#*=};     shift   ;;
 
-		--container       ) container=$2;           shift 2 ;;
-		--container=*     ) container=${1#*=};      shift   ;;
+		--containers      ) containers+=("$2");        shift 2 ;;
+		--containers=*    ) containers+=("${1#*=}");   shift   ;;
 
-		--force           ) force=true              shift   ;;
+		--force           ) force=true;                shift   ;;
 
 		'') break ;;
 		*) die "unrecognized option '$1'" ;;
@@ -52,15 +52,20 @@ main()
 	[[ -z $source ]] && die 'no source specified'
 	[[ -z $cache  ]] && die 'no cache specified'
 
-	run_container=false
+	stopped_containers=()
 
-	if [[ -n $container ]] && sbr dc-is-running "$container"; then
-		echo "stopping container '$container'..."
-		sbr dc-stop "$container"
-		run_container=true
-	elif [[ -n $container ]] && [[ $force != true ]]; then
-		die "container '$container' is not running"
-	fi
+	for c in "${containers[@]}"; do
+		if sbr dc-is-running "$c"; then
+			stopped_containers+=("$c")
+		elif [[ $force != true ]]; then
+			die "container '$c' is not running"
+		fi
+	done
+
+	for c in "${stopped_containers[@]}"; do
+		echo "stopping container '$c'..."
+		sbr dc-stop "$c"
+	done
 
 	echo "archiving '$source'..."
 
@@ -77,10 +82,10 @@ main()
 		) |
 		sbr write "$name.tar.zst.asc" "$cache"
 
-	if [[ $run_container == true ]]; then
-		echo "starting container '$container'..."
-		sbr dc-start "$container"
-	fi
+	for c in "${stopped_containers[@]}"; do
+		echo "starting container '$c'..."
+		sbr dc-start "$c"
+	done
 
 	for r in "${remotes[@]}"; do
 		echo "exporting to '$r'..."

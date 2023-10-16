@@ -9,24 +9,24 @@ main()
 	cache=''
 	remotes=()
 	password_file=''
-	container=''
+	containers=()
 
 	while :; do case ${1:-} in
 
-		--source          ) source=$2;              shift 2 ;;
-		--source=*        ) source=${1#*=};         shift   ;;
+		--source          ) source=$2;                 shift 2 ;;
+		--source=*        ) source=${1#*=};            shift   ;;
 
-		--cache           ) cache=$2;               shift 2 ;;
-		--cache=*         ) cache=${1#*=};          shift   ;;
+		--cache           ) cache=$2;                  shift 2 ;;
+		--cache=*         ) cache=${1#*=};             shift   ;;
 
-		--remote          ) remotes+=("$2");        shift 2 ;;
-		--remote=*        ) remotes+=("${1#*=}");   shift   ;;
+		--remote          ) remotes+=("$2");           shift 2 ;;
+		--remote=*        ) remotes+=("${1#*=}");      shift   ;;
 
-		--password-file   ) password_file=$2;       shift 2 ;;
-		--password-file=* ) password_file=${1#*=};  shift   ;;
+		--password-file   ) password_file=$2;          shift 2 ;;
+		--password-file=* ) password_file=${1#*=};     shift   ;;
 
-		--container       ) container=$2;           shift 2 ;;
-		--container=*     ) container=${1#*=};      shift   ;;
+		--containers      ) containers+=("$2");        shift 2 ;;
+		--containers=*    ) containers+=("${1#*=}");   shift   ;;
 
 		'') break ;;
 		*) die "unrecognized option '$1'" ;;
@@ -81,13 +81,15 @@ main()
 		die 'no backups found to restore from.'
 	fi
 
-	run_container=false
+	stopped_containers=()
 
-	if [[ -n $container ]] && sbr dc-is-running "$container"; then
-		echo "stopping container '$container'..."
-		sbr dc-stop "$container"
-		run_container=true
-	fi
+	for c in "${containers[@]}"; do
+		if sbr dc-is-running "$c"; then
+			echo "stopping container '$c'..."
+			sbr dc-stop "$c"
+			stopped_containers+=("$c")
+		fi
+	done
 
 	echo "unarchiving to '$source'..."
 
@@ -102,10 +104,10 @@ main()
 		sbr unzstd |
 		sbr unarchive-to "$source"
 
-	if [[ $run_container == true ]]; then
-		echo "starting container '$container'..."
-		sbr dc-start "$container"
-	fi
+	for c in "${stopped_containers[@]}"; do
+		echo "starting container '$c'..."
+		sbr dc-start "$c"
+	done
 
 	echo 'done.'
 }
