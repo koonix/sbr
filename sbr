@@ -128,11 +128,4 @@ call()
 	esac
 }
 
-split()
-{
-	local arr
-	IFS=$'\n' read -d '' -ra seg <<< "${1//:/$'\n'}"
-	printf '%s\n' "${arr[@]}"
-}
-
 main "$@"
