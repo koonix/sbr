@@ -47,4 +47,4 @@ if [[ -n $extra_file ]]; then
 	docker exec "$container" rm "$extra_file"
 fi
 
-[[ -n $result ]] && echo yes || echo no
+[[ -n $result ]]

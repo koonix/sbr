@@ -117,7 +117,11 @@ call()
 {
 	local cmd=$1
 	shift
+	case ${cmd##*/} in
+		exists|is-*|*-is-*) set +e ;;
+	esac
 	SBR="$0" "$SBR_LIB_DIR/$cmd" "$@"
+	set -e
 }
 
 split()
