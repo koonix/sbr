@@ -9,4 +9,4 @@ join()
 	echo "$*"
 }
 
-sbr exists "mariadb-docker:$(join ':' "$@")"
+[[ $(sbr exists "mariadb-docker:$(join ':' "$@")") == yes ]]

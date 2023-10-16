@@ -2,4 +2,4 @@
 
 path=$1
 
-[ -e "$path" ]
+[ -e "$path" ] && echo yes || echo no

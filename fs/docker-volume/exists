@@ -7,4 +7,4 @@ exec docker run --rm --volume "$volume:/volume:ro" alpine:3 sh -c '
 	set -eu
 	path=${0:-"."}
 	[ -e "/volume/$path" ]
-' "$path"
+' "$path" && echo yes || echo no
