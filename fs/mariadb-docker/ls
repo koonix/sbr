@@ -20,22 +20,10 @@ if [[ -n $password_file ]]; then
 	)
 fi
 
-param_file=$(
-	docker exec --interactive "$container" sh -c '
-		set -eu
-		file=$(mktemp)
-		chmod 644 "$file"
-		cat > "$file"
-		echo "$file"
-	' <<< "$database"
-)
-
 docker exec "$container" mariadb-show \
 	${extra_file:+--defaults-extra-file="$extra_file"} \
 	${user:+--user="$user"} \
 	--count -- "$database"
-
-docker exec "$container" rm "$param_file"
 
 if [[ -n $extra_file ]]; then
 	docker exec "$container" rm "$extra_file"
