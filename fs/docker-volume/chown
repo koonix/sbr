@@ -1,0 +1,8 @@
+#!/bin/sh -eu
+
+volume=$1
+path=$2
+shift 2
+
+exec docker run --rm --volume "$volume:/volume:rw" alpine:3 \
+	chown "$@" -- "/volume/$path"

@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+
+path=$1
+shift
+
+exec chown "$@" -- "$path"

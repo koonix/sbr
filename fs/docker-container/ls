@@ -1,0 +1,7 @@
+#!/bin/sh -eu
+
+container=$1
+path=$2
+
+exec docker exec "$container" \
+	ls -lahF --group-directories-first --full-time -- "$path"

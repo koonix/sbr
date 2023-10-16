@@ -1,0 +1,138 @@
+#!/bin/bash
+set -euE -o pipefail
+trap 'echo "${0##*/}: failed @ line $LINENO: $BASH_COMMAND"' ERR
+
+main()
+{
+	cmd=${1:-}
+
+	case $cmd in
+		dc-is-running|dc-start|dc-status|dc-stop|decrypt|\
+		encrypt|is-newer|is-number|newest|nth|oldest|sort|\
+		unzstd|write|xargs|zstd)
+			lib "$@"
+		;;
+
+		archive-from|chmod|chown|clear|exists|is-restorable|\
+		list|ls|mkdir|rm|rmdir|rmfile|unarchive-to)
+			fs "$@"
+		;;
+
+		backup|restore-latest)
+			bin "$@"
+		;;
+
+		copy)
+			remote "$@"
+		;;
+
+		*)
+			echo "unrecognized command '$1'" >&2
+			exit 1
+		;;
+	esac
+}
+
+lib()
+{
+	local cmd=$1
+	shift
+	call "lib/$cmd" "$@"
+}
+
+bin()
+{
+	local cmd=$1
+	shift
+	call "bin/$cmd" "$@"
+}
+
+fs()
+{
+	local cmd=$1 path=$2
+
+	readarray -t seg <<< "${path//:/$'\n'}"
+
+	if [[ ${#seg[@]} -le 1 ]] && [[ ! $path == *:* ]]; then
+		call "fs/local/$cmd" "$path"
+		return
+	fi
+
+	case ${seg[0]} in
+		rclone)
+			path=${path#${seg[0]}:}
+			call "fs/rclone/$cmd" "$path"
+		;;
+
+		docker-container|dc)
+			container=${seg[1]}
+			path=${seg[2]}
+			call "fs/docker-container/$cmd" "$container" "$path"
+		;;
+
+		docker-volume|dv)
+			volume=${seg[1]}
+			path=${seg[2]:-}
+			if ! docker volume inspect -- "$volume" >/dev/null 2>&1; then
+				echo "'$volume': no such docker volume" >&2
+				exit 1
+			fi
+			call "fs/docker-volume/$cmd" "$volume" ${path+"$path"}
+		;;
+
+		mariadb-docker|mdbd)
+			container=${seg[1]}
+			database=${seg[2]}
+			user=${seg[3]:-}
+			password_file=${seg[4]:-}
+			call "fs/mariadb-docker/$cmd" "$container" "$database" \
+				${user+"$user"} ${password_file+"$password_file"}
+		;;
+
+		local)
+			path=${path#${seg[0]}:}
+			call "fs/local/$cmd" "$path"
+		;;
+
+		*)
+			call "fs/local/$cmd" "$path"
+		;;
+	esac
+}
+
+remote()
+{
+	local cmd=$1 path1=$2 path2=$3
+	if [[ $path1 == rclone:* ]] || [[ $path2 == rclone:* ]]; then
+		path1=${path1#rclone:}
+		path2=${path2#rclone:}
+		call "fs/rclone/$cmd" "$path1" "$path2"
+	else
+		echo 'this command does not support the given path type combination' >&2
+		exit 1
+	fi
+}
+
+call()
+{
+	local cmd=$1
+	shift
+	SBR="$0" "$SBR_LIB_DIR/$cmd" "$@" && code=$? || code=$?
+	case ${cmd##*/} in
+		exists|is-*|*-is-*) ;;
+		*)
+			if [[ $code -ne 0 ]]; then
+				echo "command failed: $cmd $*" >&2
+				exit $code
+			fi
+	esac
+}
+
+split()
+{
+	local arr
+	IFS=$'\n' read -d '' -ra seg <<< "${1//:/$'\n'}"
+	printf '%s\n' "${arr[@]}"
+}
+
+main "$@"

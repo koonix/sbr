@@ -1,0 +1,7 @@
+#!/bin/sh -eu
+
+volume=$1
+path=${2:-}
+
+exec docker run --rm --volume "$volume:/volume:ro" alpine:3 \
+	tar --create --file=- --directory="/volume${path:+/$path}" .

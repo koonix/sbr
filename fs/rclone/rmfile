@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+
+remote=$1
+shift
+
+exec rclone deletefile --verbose "$@" -- "$remote"

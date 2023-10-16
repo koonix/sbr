@@ -1,0 +1,10 @@
+#!/bin/sh -eu
+
+path=$1
+
+cd "$path"
+for file in *; do
+	if [ -e "$file" ]; then
+		printf '%s\n' "$file"
+	fi
+done

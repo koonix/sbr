@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+sbr() { "$SBR" "$@" ;}
+
+path=$1
+
+sbr exists "$path" && [ -z "$(sbr list "$path")" ]

@@ -1,0 +1,5 @@
+#!/bin/sh -eu
+
+container=$1
+
+exec docker container inspect --format '{{.State.Status}}' "$container" 2>/dev/null

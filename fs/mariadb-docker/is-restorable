@@ -1,0 +1,12 @@
+#!/bin/bash
+set -eu -o pipefail
+sbr() { "$SBR" "$@" ;}
+
+join()
+{
+	local IFS=$1
+	shift
+	echo "$*"
+}
+
+sbr exists "mariadb-docker:$(join ':' "$@")"

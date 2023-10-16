@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+
+password_file=$1
+
+exec gpg --batch --pinentry-mode loopback --decrypt \
+	--passphrase-file "$password_file"
