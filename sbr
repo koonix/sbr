@@ -117,11 +117,14 @@ call()
 {
 	local cmd=$1
 	shift
+	SBR="$0" "$SBR_LIB_DIR/$cmd" "$@" && code=$? || code=$?
 	case ${cmd##*/} in
-		exists|is-*|*-is-*)
-			SBR="$0" "$SBR_LIB_DIR/$cmd" "$@" 2>/dev/null ;;
+		exists|is-*|*-is-*) ;;
 		*)
-			SBR="$0" "$SBR_LIB_DIR/$cmd" "$@" ;;
+			if [[ $code -ne 0 ]]; then
+				echo "command failed: ${cmd##*/}" >&2
+				exit $code
+			fi
 	esac
 }
 
