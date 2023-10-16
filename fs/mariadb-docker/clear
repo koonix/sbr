@@ -30,14 +30,20 @@ param_database=$(
 	' <<< "$database"
 )
 
+script=$(
+	docker exec --interactive "$container" mariadb \
+		${extra_file:+--defaults-extra-file="$extra_file"} \
+		${user:+--user="$user"} --silent \
+	<<- EOF
+		select concat('drop table if exists \`', table_schema, '\`.\`', table_name, '\`;')
+		from information_schema.tables
+		where table_schema = replace(load_file('$param_database'), '\n', '');
+	EOF
+)
+
 docker exec --interactive "$container" mariadb \
 	${extra_file:+--defaults-extra-file="$extra_file"} \
-	${user:+--user="$user"} --silent \
-<<- EOF
-	select concat('drop table if exists \`', table_schema, '\`.\`', table_name, '\`;')
-	from information_schema.tables
-	where table_schema = replace(load_file('$param_database'), '\n', '');
-EOF
+	${user:+--user="$user"} --silent <<< "$script"
 
 docker exec "$container" rm "$param_database"
 
