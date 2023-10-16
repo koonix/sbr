@@ -20,7 +20,7 @@ if [[ -n $password_file ]]; then
 	)
 fi
 
-param_file=$(
+param_database=$(
 	docker exec --interactive "$container" sh -c '
 		set -eu
 		file=$(mktemp)
@@ -36,10 +36,10 @@ docker exec --interactive "$container" mariadb \
 <<- EOF
 	select table_name
 	from information_schema.tables
-	where table_schema = replace(load_file('$param_file'), '\n', '');
+	where table_schema = replace(load_file('$param_database'), '\n', '');
 EOF
 
-docker exec "$container" rm "$param_file"
+docker exec "$container" rm "$param_database"
 
 if [[ -n $extra_file ]]; then
 	docker exec "$container" rm "$extra_file"
