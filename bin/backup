@@ -80,7 +80,13 @@ main()
 				cat
 			fi
 		) |
-		sbr write "$name.tar.zst.asc" "$cache"
+		(
+			if [[ -n $password_file ]]; then
+				sbr write "$name.tar.zst.asc" "$cache"
+			else
+				sbr write "$name.tar.zst" "$cache"
+			fi
+		)
 
 	for c in "${stopped_containers[@]}"; do
 		echo "starting container '$c'..."
