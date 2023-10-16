@@ -43,7 +43,12 @@ script=$(
 
 docker exec --interactive "$container" mariadb \
 	${extra_file:+--defaults-extra-file="$extra_file"} \
-	${user:+--user="$user"} --silent <<< "$script"
+	${user:+--user="$user"} --silent \
+<<- EOF
+	set foreign_key_checks = 0;
+	$script
+	set foreign_key_checks = 1;
+EOF
 
 docker exec "$container" rm "$param_database"
 
