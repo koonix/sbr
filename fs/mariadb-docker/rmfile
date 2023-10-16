@@ -1,0 +1,40 @@
+#!/bin/bash
+set -eu -o pipefail
+
+container=$1
+path=$2
+user=${3:-}
+password_file=${4:-}
+
+database=${path%%/*}
+table=${path#${database}/}
+
+extra_file=''
+
+if [[ -n $password_file ]]; then
+	extra_file=$(
+		docker exec --interactive "$container" sh -c '
+			set -eu
+			file=$(mktemp)
+			printf "[client]\npassword=" > "$file"
+			cat >> "$file"
+			echo "$file"
+		' < "$password_file"
+	)
+fi
+
+if [[ $table =~ [^a-zA-Z0-9_] ]]; then
+	echo "invalid table name '$table'" >&2
+	exit 1
+fi
+
+docker exec --interactive "$container" mariadb \
+	${extra_file:+--defaults-extra-file="$extra_file"} \
+	${user:+--user="$user"} --database=$database \
+<<- EOF
+	drop table $table cascade;
+EOF
+
+if [[ -n $extra_file ]]; then
+	docker exec "$container" rm "$extra_file"
+fi
