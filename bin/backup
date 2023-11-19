@@ -18,33 +18,35 @@ main()
 
 	while :; do case ${1:-} in
 
-		--name              ) name=$2;                   shift 2 ;;
-		--name=*            ) name=${1#*=};              shift   ;;
+		--name                ) name=$2;                     shift 2 ;;
+		--name=*              ) name=${1#*=};                shift   ;;
 
-		--source            ) source=$2;                 shift 2 ;;
-		--source=*          ) source=${1#*=};            shift   ;;
+		--source              ) source=$2;                   shift 2 ;;
+		--source=*            ) source=${1#*=};              shift   ;;
 
-		--cache             ) cache=$2;                  shift 2 ;;
-		--cache=*           ) cache=${1#*=};             shift   ;;
+		--cache               ) cache=$2;                    shift 2 ;;
+		--cache=*             ) cache=${1#*=};               shift   ;;
 
-		--remote            ) remotes+=("$2");           shift 2 ;;
-		--remote=*          ) remotes+=("${1#*=}");      shift   ;;
+		--remote              ) remotes+=("$2");             shift 2 ;;
+		--remote=*            ) remotes+=("${1#*=}");        shift   ;;
 
-		--cache-keep        ) cache_keep=$2;             shift 2 ;;
-		--cache-keep=*      ) cache_keep=${1#*=};        shift   ;;
+		--cache-keep          ) cache_keep=$2;               shift 2 ;;
+		--cache-keep=*        ) cache_keep=${1#*=};          shift   ;;
 
-		--remote-keep       ) remote_keep=$2;            shift 2 ;;
-		--remote-keep=*     ) remote_keep=${1#*=};       shift   ;;
+		--remote-keep         ) remote_keep=$2;              shift 2 ;;
+		--remote-keep=*       ) remote_keep=${1#*=};         shift   ;;
 
-		--password-file     ) password_file=$2;          shift 2 ;;
-		--password-file=*   ) password_file=${1#*=};     shift   ;;
+		--password-file       ) password_file=$2;            shift 2 ;;
+		--password-file=*     ) password_file=${1#*=};       shift   ;;
 
-		--containers        ) containers+=("$2");        shift 2 ;;
-		--containers=*      ) containers+=("${1#*=}");   shift   ;;
+		--containers          ) containers+=("$2");          shift 2 ;;
+		--containers=*        ) containers+=("${1#*=}");     shift   ;;
 
-		--light-compression ) light_compression=true;    shift   ;;
+		--light-compression   ) light_compression=true;      shift   ;;
+		--light-compression=* ) light_compression=${1#*=};   shift   ;;
 
-		--force-hooks       ) force_hooks=true;          shift   ;;
+		--force-hooks         ) force_hooks=true;            shift   ;;
+		--force-hooks=*       ) force_hooks=${1#*=};         shift   ;;
 
 		'') break ;;
 		*) die "unrecognized option '$1'" ;;
