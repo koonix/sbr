@@ -14,34 +14,37 @@ main()
 	password_file=''
 	containers=()
 	force_hooks=false
+	light_compression=false
 
 	while :; do case ${1:-} in
 
-		--name            ) name=$2;                   shift 2 ;;
-		--name=*          ) name=${1#*=};              shift   ;;
+		--name              ) name=$2;                   shift 2 ;;
+		--name=*            ) name=${1#*=};              shift   ;;
 
-		--source          ) source=$2;                 shift 2 ;;
-		--source=*        ) source=${1#*=};            shift   ;;
+		--source            ) source=$2;                 shift 2 ;;
+		--source=*          ) source=${1#*=};            shift   ;;
 
-		--cache           ) cache=$2;                  shift 2 ;;
-		--cache=*         ) cache=${1#*=};             shift   ;;
+		--cache             ) cache=$2;                  shift 2 ;;
+		--cache=*           ) cache=${1#*=};             shift   ;;
 
-		--remote          ) remotes+=("$2");           shift 2 ;;
-		--remote=*        ) remotes+=("${1#*=}");      shift   ;;
+		--remote            ) remotes+=("$2");           shift 2 ;;
+		--remote=*          ) remotes+=("${1#*=}");      shift   ;;
 
-		--cache-keep      ) cache_keep=$2;             shift 2 ;;
-		--cache-keep=*    ) cache_keep=${1#*=};        shift   ;;
+		--cache-keep        ) cache_keep=$2;             shift 2 ;;
+		--cache-keep=*      ) cache_keep=${1#*=};        shift   ;;
 
-		--remote-keep     ) remote_keep=$2;            shift 2 ;;
-		--remote-keep=*   ) remote_keep=${1#*=};       shift   ;;
+		--remote-keep       ) remote_keep=$2;            shift 2 ;;
+		--remote-keep=*     ) remote_keep=${1#*=};       shift   ;;
 
-		--password-file   ) password_file=$2;          shift 2 ;;
-		--password-file=* ) password_file=${1#*=};     shift   ;;
+		--password-file     ) password_file=$2;          shift 2 ;;
+		--password-file=*   ) password_file=${1#*=};     shift   ;;
 
-		--containers      ) containers+=("$2");        shift 2 ;;
-		--containers=*    ) containers+=("${1#*=}");   shift   ;;
+		--containers        ) containers+=("$2");        shift 2 ;;
+		--containers=*      ) containers+=("${1#*=}");   shift   ;;
 
-		--force-hooks     ) force_hooks=true;          shift   ;;
+		--light-compression ) light_compression=true;    shift   ;;
+
+		--force-hooks       ) force_hooks=true;          shift   ;;
 
 		'') break ;;
 		*) die "unrecognized option '$1'" ;;
@@ -71,6 +74,18 @@ main()
 
 	mkdir --parents --mode=700 -- "$cache"
 
+	if [[ -n $password_file ]]; then
+		target=$(sbr write-target "$name.tar.zst.asc" "$cache")
+	else
+		target=$(sbr write-target "$name.tar.zst" "$cache")
+	fi
+
+	trap 'rm -f -- "$target"' EXIT
+
+	if [[ $light_compression == true ]]; then
+		export ZSTD_CLEVEL=1
+	fi
+
 	sbr archive-from "$source" |
 		sbr zstd |
 		(
@@ -79,14 +94,9 @@ main()
 			else
 				cat
 			fi
-		) |
-		(
-			if [[ -n $password_file ]]; then
-				sbr write "$name.tar.zst.asc" "$cache"
-			else
-				sbr write "$name.tar.zst" "$cache"
-			fi
-		)
+		) > "$target"
+
+	trap - EXIT
 
 	for c in "${stopped_containers[@]}"; do
 		echo "starting container '$c'..."
