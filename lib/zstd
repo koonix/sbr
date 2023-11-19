@@ -1,3 +1,6 @@
 #!/bin/sh -eu
 
-exec zstd -10 --threads=0 "$@"
+export ZSTD_CLEVEL=${ZSTD_CLEVEL:-10}
+export ZSTD_NBTHREADS=${ZSTD_NBTHREADS:-0}
+
+exec zstd "$@"
