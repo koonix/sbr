@@ -11,7 +11,7 @@ main()
 	case $cmd in
 		dc-is-running|dc-start|dc-status|dc-stop|decrypt|\
 		encrypt|is-newer|is-number|newest|nth|oldest|sort|\
-		unzstd|write|xargs|zstd)
+		unzstd|write|write-target|xargs|zstd)
 			lib "$@"
 		;;
 

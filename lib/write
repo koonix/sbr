@@ -1,7 +1,8 @@
 #!/bin/sh -eu
+sbr() { "$SBR" "$@" ;}
 
 name=$1
 dir=$2
 
-epoch=$(date '+%s')
-cat > "$dir/$epoch-$name"
+dest=$(sbr write-target "$name" "$dir")
+cat > "$name"
