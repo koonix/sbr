@@ -4,4 +4,4 @@ password_file=$1
 
 exec gpg --batch --pinentry-mode loopback \
 	--symmetric --no-symkey-cache --cipher-algo AES256 \
-	--passphrase-file "$password_file"
+	--compress-algo none --passphrase-file "$password_file"
