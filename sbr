@@ -125,12 +125,15 @@ call()
 	shift
 	SBR="$0" "$SBR_LIB_DIR/$cmd" "$@" && code=$? || code=$?
 	case ${cmd##*/} in
-		exists|is-*|*-is-*) ;;
+		exists|is-*|*-is-*)
+			exit $code
+		;;
 		*)
 			if [[ $code -ne 0 ]]; then
 				echo "command failed: $cmd $*" >&2
 				exit $code
 			fi
+		;;
 	esac
 }
 
