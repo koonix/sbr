@@ -1,6 +1,8 @@
 #!/bin/sh -eu
 sbr() { "$SBR" "$@" ;}
 
-path=$1
+volume=$1
 
-sbr exists "$path" && [ -z "$(sbr list "$path")" ]
+sbr exists "docker-volume:$volume"
+list=$(sbr list "docker-volume:$volume")
+[ -z "$list" ]

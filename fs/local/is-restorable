@@ -3,4 +3,6 @@ sbr() { "$SBR" "$@" ;}
 
 path=$1
 
-sbr exists "$path" && [ -z "$(sbr list "$path")" ]
+sbr exists "$path"
+list=$(sbr list "$path")
+[ -z "$list" ]
