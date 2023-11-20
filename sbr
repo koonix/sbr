@@ -2,7 +2,7 @@
 set -euE -o pipefail
 trap 'echo "${0##*/}: failed @ line $LINENO: $BASH_COMMAND"' ERR
 
-version=0.2.3
+version=0.2.4
 
 main()
 {
