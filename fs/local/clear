@@ -2,4 +2,9 @@
 
 path=$1
 
-exec rm -rf -- "$path"/* "$path"/.*
+cd "$path"
+for file in * .*; do
+	if [ -e "$file" ] && [ "$file" != . ] && [ $file != .. ]; then
+		rm -rf -- "$file"
+	fi
+done
